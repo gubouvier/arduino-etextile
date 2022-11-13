@@ -9,12 +9,21 @@
 #define PIN_STRIPE 6
 
 #define PIN_SETUP_COLOR 3
-#define PIN_SET_WHITE 4
+#define PIN_CHANGE_STATE 4
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, PIN_STRIPE, NEO_GRB + NEO_KHZ800);
 
 byte gammatable[256];
+
+/*
+State:
+0 = Off
+1 = TCS color
+2 = moving white
+3 = static white
+*/
+int state = 0;
 
 void setup() {
   // Setup serial
@@ -55,24 +64,30 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(digitalRead(PIN_SET_WHITE)) {
-        set_stripe_white();
+  if(digitalRead(PIN_CHANGE_STATE)) {
+    state++;
+    if(state > 3) {
+      state = 0;
+    }
   }
-  delay(500);
+  if(state == 2) {
+    set_stripe_white();
+  } else if(state == 3) {
+    move_light();            
+  } else if(state == 0) {
+    strip.clear();
+    strip.show();    
+  }
+  delay(50);
 }
 
 void ISR_set_stripe_color(void) {
   tcs.setInterrupt(false);      // turn on LED
-
   delay(60);  // takes 50ms to read 
-  
   uint16_t clear, red, green, blue;
-
   tcs.getRawData(&red, &green, &blue, &clear);
-
+  delay(60);
   tcs.setInterrupt(true);  // turn off LED
-
-  tcs.getRawData(&red, &green, &blue, &clear);
 
   // Figure out some basic hex code for visualization
   uint32_t sum = red;
@@ -109,4 +124,8 @@ void colorWipe(uint32_t c, uint8_t wait) {
       strip.show();
       delay(wait);
   }
+}
+
+void move_light() {
+  
 }
