@@ -3,7 +3,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN_GATE_IN 2
-#define PIN_LED_OUT 13
+#define PIN_LED_OUT 8
 
 #define STRIPE_LENGTH 1
 #define PIN_STRIPE 6
@@ -33,6 +33,7 @@ void setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
   
+/*
   // Detect TCS
   // TODO: replace with 'while not tcs.begin()'
   if (tcs.begin()) {
@@ -41,15 +42,22 @@ void setup() {
     Serial.println("No TCS34725 found ... check your connections");
     while (1); // halt!
   }
-
+*/
   // Setup pinMode
   pinMode(PIN_LED_OUT, OUTPUT);
   pinMode(PIN_GATE_IN, INPUT);
 
   // Setup Interrupt
-  attachInterrupt(digitalPinToInterrupt(PIN_GATE_IN), ISR_sound_beat, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(PIN_SETUP_COLOR), ISR_set_stripe_color, RISING);
+  attachInterrupt(digitalPinToInterrupt(0), ISR_sound_beat, CHANGE);
+ // attachInterrupt(digitalPinToInterrupt(PIN_SETUP_COLOR), ISR_set_stripe_color, RISING);
 
+  strip.setPixelColor(0, strip.Color(255, 255, 255));
+  strip.show();
+  Serial.println("Wait 5");
+  delay(5000);
+  strip.clear();
+  strip.show();
+  Serial.println("Done");
 
   for (int i=0; i<256; i++) {
     float x = i;
@@ -63,6 +71,8 @@ void setup() {
 }
 
 void loop() {
+
+  /*
   // put your main code here, to run repeatedly:
   if(digitalRead(PIN_CHANGE_STATE)) {
     state++;
@@ -77,10 +87,10 @@ void loop() {
   } else if(state == 0) {
     strip.clear();
     strip.show();    
-  }
+  }*/
   delay(50);
 }
-
+/*
 void ISR_set_stripe_color(void) {
   tcs.setInterrupt(false);      // turn on LED
   delay(60);  // takes 50ms to read 
@@ -104,14 +114,29 @@ void ISR_set_stripe_color(void) {
   uint32_t color = strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
   colorWipe(color, 0);
 }
-
+*/
 void ISR_sound_beat(void) {
+  Serial.println("Interrupt");
   int pin_val;
 
   pin_val = digitalRead(PIN_GATE_IN);
-  digitalWrite(PIN_LED_OUT, pin_val);
-}
+ // digitalWrite(PIN_LED_OUT, pin_val);
+  if(pin_val) {
+    Serial.print("ON: ");
+    Serial.println(pin_val);
+    strip.setPixelColor(0, strip.Color(255, 255, 255));
+    strip.show();
+  }
+  else {
+    Serial.print("OFF: ");
+    Serial.println(pin_val);
+    strip.clear();
+    strip.show();
+  }
 
+  
+}
+/*
 void set_stripe_white(void) {
   uint32_t white = strip.Color(0,0,0,255);
   colorWipe(white, 0);
@@ -129,3 +154,4 @@ void colorWipe(uint32_t c, uint8_t wait) {
 void move_light() {
   
 }
+*/
