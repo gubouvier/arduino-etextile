@@ -10,13 +10,14 @@
 
 unsigned long last_millis = 0;
 
-//int strip_color[3] = {50, 50, 50};
-
 byte gammatable[256];
 
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, STRIP_DATA, NEO_GRB + NEO_KHZ800);
+
+uint32_t strip_color = strip.Color(255,255,255);
+
 
 void setup() {
   // Setup Serial connection
@@ -29,12 +30,13 @@ void setup() {
 
   // Setup pin mode
   pinMode(GATE_PIN, INPUT);
-  pinMode(SENSOR_BUTTON, INPUT);
+  pinMode(SENSOR_BUTTON, INPUT_PULLUP);
   pinMode(STRIP_DATA, OUTPUT);
 
   // Detect TCS
   if(tcs.begin()) {
     Serial.println("Found sensor");
+    tcs.setInterrupt(true);
   } else {
     Serial.println("Sensor not found");
     while(1);
@@ -49,23 +51,37 @@ void setup() {
     gammatable[i] = x;      
     //Serial.println(gammatable[i]);
   }
+
+//  Serial.println("Red");
+  strip.setPixelColor(0, strip.Color(255,0,0));
+  strip.show();
+  delay(1000);  
+//  Serial.println("Green");
+  strip.setPixelColor(0, strip.Color(0,255,0));
+  strip.show();
+  delay(1000);
+ // Serial.println("Blue");
+  strip.setPixelColor(0, strip.Color(0,0,255));
+  strip.show();
+  delay(1000);  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  /*
-  if(digitalRead(GATE_PIN)) {
+  
+  if(digitalRead(GATE_PIN) == HIGH) {
     light_up();
   } else {
     light_down();
   }
+
   if(millis() - last_millis > 1000) {
-    if(digitalRead(SENSOR_BUTTON)) {
+    if(digitalRead(SENSOR_BUTTON) == LOW) {
       change_color();
     }
     last_millis = millis();
   }
-  */
+  /*
   Serial.println("Red");
   strip.setPixelColor(0, strip.Color(255,0,0));
   strip.show();
@@ -75,25 +91,28 @@ void loop() {
   strip.show();
   delay(1000);
   Serial.println("Blue");
-
   strip.setPixelColor(0, strip.Color(0,0,255));
   strip.show();
   delay(1000);
-  change_color();
-  delay(5000);
+/*  change_color();
+  delay(5000);*/
 }
 
 void light_up() {
- 
+//  Serial.println("UP");
+  strip.setPixelColor(0, strip_color);
+  strip.show();
 }
 
 void light_down() {
-
+//  Serial.println("DOWN");
+  strip.clear();
+  strip.show();
 }
 
 void change_color() {
   tcs.setInterrupt(false);
-  delay(60);
+  delay(1000);
   uint16_t clear, red, green, blue;
   tcs.getRawData(&red, &green, &blue, &clear);
   tcs.setInterrupt(true);
@@ -103,12 +122,14 @@ void change_color() {
   sum += green;
   sum += blue;
 
+  uint32_t color; 
+
   float r, g, b;
   r = red; r /= sum;
   g = green; g /= sum;
   b = blue; b /= sum;
   r *= 256; g *= 256; b *= 256;
-
+/*
   Serial.print("Before: ");
   Serial.print(r);
   Serial.print(" ");
@@ -116,13 +137,12 @@ void change_color() {
   Serial.print(" ");
   Serial.println(b);
 
-  uint32_t color; 
   color = strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
   strip.setPixelColor(0,color);
   strip.show();
 
   delay(5000);
-
+*/
   increase_brightness(&r, &g, &b);
 
   Serial.print("After: ");
@@ -135,6 +155,9 @@ void change_color() {
   color = strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
   strip.setPixelColor(0,color);
   strip.show();
+  delay(1000);
+  strip_color = color;
+
 }
 
 void increase_brightness(float *r, float *g, float *b) {
