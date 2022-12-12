@@ -4,6 +4,7 @@
 
 #define GATE_PIN 2
 #define SENSOR_BUTTON 8
+#define MODE_BUTTON 9
 #define STRIP_DATA 6
 
 #define STRIPE_LENGTH 1
@@ -12,6 +13,8 @@ unsigned long last_millis = 0;
 
 byte gammatable[256];
 
+// Light mode, 0 = off, 1 = beat (reset to white), 2 = steady
+int mode = 0;
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, STRIP_DATA, NEO_GRB + NEO_KHZ800);
@@ -31,6 +34,7 @@ void setup() {
   // Setup pin mode
   pinMode(GATE_PIN, INPUT);
   pinMode(SENSOR_BUTTON, INPUT_PULLUP);
+  pinMode(MODE_BUTTON, INPUT_PULLUP);
   pinMode(STRIP_DATA, OUTPUT);
 
   // Detect TCS
@@ -52,15 +56,15 @@ void setup() {
     //Serial.println(gammatable[i]);
   }
 
-//  Serial.println("Red");
+  Serial.println("Red");
   strip.setPixelColor(0, strip.Color(255,0,0));
   strip.show();
   delay(1000);  
-//  Serial.println("Green");
+  Serial.println("Green");
   strip.setPixelColor(0, strip.Color(0,255,0));
   strip.show();
   delay(1000);
- // Serial.println("Blue");
+  Serial.println("Blue");
   strip.setPixelColor(0, strip.Color(0,0,255));
   strip.show();
   delay(1000);  
@@ -69,15 +73,22 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   
-  if(digitalRead(GATE_PIN) == HIGH) {
+  if(mode == 0) {
+    light_down();   
+  } else if(digitalRead(GATE_PIN) == HIGH && mode == 1) {
     light_up();
-  } else {
+  } else if (mode ==1 ) {
     light_down();
+  } else if (mode == 2) {
+    light_up();
   }
 
   if(millis() - last_millis > 1000) {
     if(digitalRead(SENSOR_BUTTON) == LOW) {
       change_color();
+    }
+    if(digitalRead(MODE_BUTTON) == LOW) {
+      change_mode();
     }
     last_millis = millis();
   }
@@ -99,13 +110,13 @@ void loop() {
 }
 
 void light_up() {
-//  Serial.println("UP");
+  Serial.println("UP");
   strip.setPixelColor(0, strip_color);
   strip.show();
 }
 
 void light_down() {
-//  Serial.println("DOWN");
+  Serial.println("DOWN");
   strip.clear();
   strip.show();
 }
@@ -129,7 +140,7 @@ void change_color() {
   g = green; g /= sum;
   b = blue; b /= sum;
   r *= 256; g *= 256; b *= 256;
-/*
+  /*
   Serial.print("Before: ");
   Serial.print(r);
   Serial.print(" ");
@@ -142,7 +153,7 @@ void change_color() {
   strip.show();
 
   delay(5000);
-*/
+  */
   increase_brightness(&r, &g, &b);
 
   Serial.print("After: ");
@@ -177,4 +188,29 @@ float find_max(float r, float g, float b) {
     }
   }
   return array[max];
+}
+
+void change_mode(){
+  if(mode == 0) {
+    mode++;
+    strip_color = strip.Color(255, 255, 255);
+  }
+  else if(mode ==1) {
+    mode++;
+  }
+  else {
+    mode = 0;
+  }
+  blink_blue();
+}
+  
+void blink_blue() {
+  for (int i=0; i<2; i++) {
+    strip.setPixelColor(0, strip.Color(0, 0, 255));
+    strip.show();
+    delay(500);
+    strip.clear();
+    strip.show();
+    delay(500);
+  }
 }
