@@ -14,7 +14,7 @@ unsigned long last_millis = 0;
 byte gammatable[256];
 
 // Light mode, 0 = off, 1 = beat (reset to white), 2 = steady 
-int mode = 2;
+int mode = 1;
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, STRIP_DATA, NEO_GRB + NEO_KHZ800);
@@ -37,16 +37,16 @@ void setup() {
   strip.setBrightness(255);
   strip.clear();
   strip.show();
-/*
+
   // Detect TCS
   if(tcs.begin()) {
     Serial.println("Found sensor");
     tcs.setInterrupt(true);
   } else {
     Serial.println("Sensor not found");
-    while(1);
+    // while(1);
   }
-*/
+
   for (int i=0; i<256; i++) {
     float x = i;
     x /= 255;
@@ -60,14 +60,12 @@ void setup() {
   init_test();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  
+void loop() {  
   if(mode == 0) {
     light_down();   
   } else if(digitalRead(GATE_PIN) == HIGH && mode == 1) {
     light_up();
-  } else if (mode ==1 ) {
+  } else if (mode == 1 ) {
     light_down();
   } else if (mode == 2) {
     light_up();
