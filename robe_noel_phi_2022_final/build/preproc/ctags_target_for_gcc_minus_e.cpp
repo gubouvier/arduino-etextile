@@ -1,14 +1,8 @@
-#include <Wire.h>
-#include <Adafruit_TCS34725.h>
-#include <Adafruit_NeoPixel.h>
-
-#define GATE_PIN 2
-#define SENSOR_BUTTON 8
-#define MODE_BUTTON 9
-#define STRIP_DATA 6
-
-#define STRIPE_LENGTH 4
-
+# 1 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+# 2 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino" 2
+# 3 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino" 2
+# 4 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino" 2
+# 12 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
 unsigned long last_millis = 0;
 
 byte gammatable[256];
@@ -16,8 +10,8 @@ byte gammatable[256];
 // Light mode, 0 = off, 1 = beat (reset to white), 2 = steady 
 int mode = 1;
 
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, STRIP_DATA, NEO_GRB + NEO_KHZ800);
+Adafruit_TCS34725 tcs = Adafruit_TCS34725((0x00) /**< 614.4ms - 256 cycles - Max Count: 65535 */, TCS34725_GAIN_1X);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(4, 6, ((1 << 6) | (1 << 4) | (0 << 2) | (2)) /*|< Transmit as G,R,B*/ + 0x0000 /*|< 800 KHz data transmission*/);
 
 uint32_t strip_color = strip.Color(255,255,255);
 
@@ -27,10 +21,10 @@ void setup() {
   Serial.begin(9600);
 
   // Setup pin mode
-  pinMode(GATE_PIN, INPUT);
-  pinMode(SENSOR_BUTTON, INPUT_PULLUP);
-  pinMode(MODE_BUTTON, INPUT_PULLUP);
-  pinMode(STRIP_DATA, OUTPUT);
+  pinMode(2, 0x0);
+  pinMode(8, 0x2);
+  pinMode(9, 0x2);
+  pinMode(6, 0x1);
 
   // Initialize strip
   strip.begin();
@@ -52,18 +46,18 @@ void setup() {
     x /= 255;
     x = pow(x, 2.5);
     x *= 255;
-      
-    gammatable[i] = x;      
+
+    gammatable[i] = x;
     //Serial.println(gammatable[i]);
   }
 
   init_test();
 }
 
-void loop() {  
+void loop() {
   if(mode == 0) {
-    light_down();   
-  } else if(digitalRead(GATE_PIN) == HIGH && mode == 1) {
+    light_down();
+  } else if(digitalRead(2) == 0x1 && mode == 1) {
     light_up();
   } else if (mode == 1 ) {
     light_down();
@@ -72,10 +66,10 @@ void loop() {
   }
 
   if(millis() - last_millis > 1000) {
-    if(digitalRead(SENSOR_BUTTON) == LOW) {
+    if(digitalRead(8) == 0x0) {
       change_color();
     }
-    if(digitalRead(MODE_BUTTON) == LOW) {
+    if(digitalRead(9) == 0x0) {
       change_mode();
     }
     last_millis = millis();
@@ -84,16 +78,16 @@ void loop() {
 
 void light_up() {
   Serial.println("UP");
-  for (int i = 0; i < STRIPE_LENGTH; i++) {
+  for (int i = 0; i < 4; i++) {
     strip.setPixelColor(i, strip_color);
   }
   strip.show();
-  
+
 }
 
 void light_down() {
   Serial.println("DOWN");
-  for (int i = 0; i < STRIPE_LENGTH; i++) {
+  for (int i = 0; i < 4; i++) {
     strip.clear();
   }
   strip.show();
@@ -111,7 +105,7 @@ void change_color() {
   sum += green;
   sum += blue;
 
-  uint32_t color; 
+  uint32_t color;
 
   float r, g, b;
   r = red; r /= sum;
@@ -127,7 +121,7 @@ void change_color() {
   Serial.print(g);
   Serial.print(" ");
   Serial.println(b);
-  
+
   color = strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
   strip.setPixelColor(0,color);
   strip.show();
@@ -168,10 +162,10 @@ void change_mode(){
   }
   blink_blue();
 }
-  
+
 void blink_blue() {
   for (int i=0; i<2; i++) {
-    for (int j = 0; j < STRIPE_LENGTH; j++) {
+    for (int j = 0; j < 4; j++) {
       strip.setPixelColor(j, strip.Color(0, 0, 255));
     }
     strip.show();
@@ -184,7 +178,7 @@ void blink_blue() {
 
 void init_test(){
   uint32_t colors[4] = {strip.Color(255, 0, 0), strip.Color(0, 255, 0), strip.Color(0, 0, 255), strip.Color(255, 255, 255)};
-  for(int i = 0; i < STRIPE_LENGTH; i++) {
+  for(int i = 0; i < 4; i++) {
     strip.setPixelColor(i, colors[i]);
     strip.show();
     delay(500);

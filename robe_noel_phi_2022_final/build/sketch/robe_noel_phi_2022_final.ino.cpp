@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#line 1 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 #include <Adafruit_NeoPixel.h>
@@ -22,6 +24,27 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(STRIPE_LENGTH, STRIP_DATA, NEO_GRB +
 uint32_t strip_color = strip.Color(255,255,255);
 
 
+#line 25 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void setup();
+#line 63 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void loop();
+#line 85 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void light_up();
+#line 94 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void light_down();
+#line 102 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void change_color();
+#line 139 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void increase_brightness(float *r, float *g, float *b);
+#line 147 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+float find_max(float r, float g, float b);
+#line 158 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void change_mode();
+#line 172 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void blink_blue();
+#line 185 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
+void init_test();
+#line 25 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\robe_noel_phi_2022_final.ino"
 void setup() {
   // Setup Serial connection
   Serial.begin(9600);
@@ -190,3 +213,4 @@ void init_test(){
     delay(500);
   }
 }
+

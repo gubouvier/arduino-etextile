@@ -1,0 +1,6 @@
+#line 1 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\.vscode\\arduino.json"
+{
+    "sketch": "robe_noel_phi_2022_final.ino",
+    "board": "arduino:avr:uno",
+    "output": "build"
+}

@@ -1,0 +1,33 @@
+#line 1 "C:\\Users\\guill\\OneDrive\\Documents\\Arduino\\arduino-etextile\\robe_noel_phi_2022_final\\.vscode\\c_cpp_properties.json"
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/Users/guill/OneDrive/Documents/Arduino/libraries/**",
+                "C:/Program Files/Arduino IDE/resources/app/node_modules/arduino-ide-extension/**",
+                "C:/Users/guill/Appdata/Local/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino/",
+                "c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/avr/1.8.6/libraries/EEPROM/",
+                "c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/avr/1.8.6/libraries/HID/",
+                "c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/avr/1.8.6/libraries/SPI/",
+                "c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/avr/1.8.6/libraries/SoftwareSerial/",
+                "c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/avr/include/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/avr/include/avr/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/avr/include/compat/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/avr/include/util/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/lib/gcc/avr/4.*.*/include/",
+                //"c:/users/guill/appdata/local/arduino15/packages/arduino/hardware/tools/avr/lib/gcc/avr/4.*.*/include-fixed/",
+                "C:/Users/guill/AppData/Local/Arduino15/libraries/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}
