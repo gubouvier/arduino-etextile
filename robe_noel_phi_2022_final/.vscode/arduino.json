@@ -1,0 +1,5 @@
+{
+    "sketch": "robe_noel_phi_2022_final.ino",
+    "board": "arduino:avr:uno",
+    "output": "build"
+}
