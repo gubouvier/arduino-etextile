@@ -3,7 +3,7 @@
 #define LED_PIN 1
 #define LED_COUNT 22
 #define DELAY 15
-#define OFFSET 64 // 512 / LED_COUNT -- Used to distribute LED positions in gamma array
+#define OFFSET 64 // Used to distribute LED positions in gamma array
 
 #define MODE_BUTTON 2
 
@@ -12,8 +12,8 @@
 #define FADE 2
 
 #define Y_R 255
-#define Y_G 255
-#define Y_B 50
+#define Y_G 200
+#define Y_B 200
 
 #define STEADY_BRIGHTNESS_PERC 0.5
 
