@@ -1,17 +1,44 @@
 #include <Adafruit_NeoPixel.h>
 
 #define LED_PIN 1
-#define LED_COUNT 4
+#define LED_COUNT 22
 #define DELAY 15
-#define OFFSET 120
+#define OFFSET 64 // 512 / LED_COUNT -- Used to distribute LED positions in gamma array
 
 #define MODE_BUTTON 2
 
-int mode = 0;
-unsigned long last_millis = 0;
+#define SHUTDOWN 0
+#define STEADY 1
+#define FADE 2
 
+#define Y_R 255
+#define Y_G 255
+#define Y_B 50
+
+#define STEADY_BRIGHTNESS_PERC 0.5
+
+int mode = FADE;
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+const uint8_t PROGMEM gamma8[] = {
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+    1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+    5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+   10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+   17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+   25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+   37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+   51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+   69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+   90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+  115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+  144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+  177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+  215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255
+};
 
 const uint16_t PROGMEM gamma16[] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -52,18 +79,17 @@ void setup() {
   strip.begin();
   strip.clear();
   strip.show();
-
   pinMode(MODE_BUTTON, INPUT_PULLUP);
 }
 
 void loop() {
-  if(mode == 0) {
+  if(mode == SHUTDOWN) {
     strip.clear();
     strip.show();
   } 
-  if(mode == 1) {
+  else if(mode == STEADY) {
     steady();
-  } else if(mode == 2) {
+  } else if(mode == FADE) {
     cross_fade();
   }
   check_mode_change();
@@ -71,13 +97,18 @@ void loop() {
 }
 
 void check_mode_change() {
-  if(millis() - last_millis > 1000) {
-    if(digitalRead(MODE_BUTTON) == LOW) {
-      change_mode();
-    }
-    last_millis = millis();
+  if(digitalRead(MODE_BUTTON) == LOW) {
+    wait_for_button_up();
+    change_mode();
   }
 }
+
+void wait_for_button_up() {
+  while (digitalRead(MODE_BUTTON) == LOW) {
+    delay(10);
+  }
+}
+
 
 void change_mode() {
   if(mode < 2) {
@@ -89,7 +120,7 @@ void change_mode() {
 
 void steady() {
   for(int i=0; i < LED_COUNT; i++) {
-    strip.setPixelColor(i, 100, 100, 100);
+    strip.setPixelColor(i, (int)Y_R*STEADY_BRIGHTNESS_PERC, (int)Y_G*STEADY_BRIGHTNESS_PERC, (int)Y_B*STEADY_BRIGHTNESS_PERC);
   }
   strip.show();
 }
@@ -98,9 +129,10 @@ void cross_fade() {
   for(int i=0; i < 512; i++) {
     for(int j=0; j<LED_COUNT; j++) {
       uint8_t result = pgm_read_byte(&gamma16[(i+OFFSET*j)%512]);
-      strip.setPixelColor(j, result, result, result);
+      float intensity_pct = result / 255.0;
+      strip.setPixelColor(j, (int)Y_R*intensity_pct, (int)Y_G*intensity_pct, (int)Y_B*intensity_pct);
       check_mode_change();
-      if(mode != 2) {
+      if(mode != FADE) {
         return;
       }
     }
