@@ -1,40 +1,49 @@
 // TODO: Regler le probleme de 'flickering' en base intensite.  (variation de la lecture analogue du potentio)
-
-
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_TCS34725.h>
 
+// Verbosity
 #define DEBUG_ALL 9
+#define DEBUG_LOOP_INFO 6
 #define DEBUG_MODE_CHANGE 5
 #define DEBUG_OFF 0
+#define DEBUG DEBUG_LOOP_INFO
 
-#define DEBUG DEBUG_OFF
-
+// Loop delay
 #define DELAY 100
 
-#define LED_STRIP_DATA 6
-#define PIN_BRIGHTNESS A0
-#define PIN_MODE_CHANGE 7
-#define PIN_CHECK_COLOR 8
+// PIN definition
+#define LED_STRIP_DATA 12
+#define PIN_BRIGHTNESS 10
+#define PIN_MODE_CHANGE 9
+#define PIN_CHECK_COLOR 6
 
+// NeoPixel Strip information
 #define NUMPIXELS 100
-#define INTENSITE_MAX 150
-#define INTENSITE_MIN 1
 
+// Brightness config
+#define INTENSITE_MAX 100
+#define INTENSITE_MIN 1
 #define POT_MIN_VALUE 512
 
+// Mode config
 #define MODE_OFF -1
 #define MODE_STEADY 0
 #define MODE_FADE 1
 
+// Wait before reverting to white after color change
 #define FADE_DELAY 20000
+#define FADE_STEPS 50
 
+// NeoPixel strip initialization 
+// ** NOTE : Had to change default value of NEO_GRB to NEO_RGB for this version https://www.adafruit.com/product/4917
 Adafruit_NeoPixel strip(NUMPIXELS, LED_STRIP_DATA, NEO_RGB + NEO_KHZ800);
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
 byte gammatable[256];
 
+// Define starting mode
 int mode = MODE_STEADY;
 
 int intensite_table[10]; 
@@ -70,12 +79,27 @@ void setup() {
 
   init_gammatable();
   init_intensite_table();
-  strip_color = strip.Color(gammatable[intensite], gammatable[intensite], gammatable[intensite]);
+  strip_color = strip.Color(gammatable[255], gammatable[255], gammatable[255]);
 }
 
 void loop() {
+  if(DEBUG >= DEBUG_LOOP_INFO) {
+    Serial.println("--- Loop Start ---");
+    Serial.println("Variables :");
+    Serial.print("  intensite : ");
+    Serial.println(intensite);
+    Serial.print("  mode : ");
+    Serial.println(mode);
+    Serial.print("  strip_color: R(");
+    Serial.print(Red(strip_color));
+    Serial.print(") G(");
+    Serial.print(Green(strip_color));
+    Serial.print(") B(");
+    Serial.print(Blue(strip_color));
+    Serial.println(")");
+    Serial.println("-----------------");
+  }
   intensite = get_intensite();
-  Serial.println(intensite);
 
   if(digitalRead(PIN_MODE_CHANGE) == LOW) {
     wait_pin_up(PIN_MODE_CHANGE);
@@ -134,12 +158,6 @@ int get_intensite() {
   } else {
     intensite_pointer++;
   }
-  // Serial.print("Table : ");
-  // for(int i=0; i<10; i++) {
-  //   Serial.print(intensite_table[i]);
-  //   Serial.print(", ");
-  // }
-  // Serial.println(" .");
 
   int somme = 0;
   for(int i=0; i<10; i++) {
@@ -150,7 +168,7 @@ int get_intensite() {
 
 void change_mode() {
   if(DEBUG >= DEBUG_MODE_CHANGE) {
-    Serial.println("Change Mode");
+    Serial.println("change_mode : Change Mode");
   }
   if(mode < 1) {
     mode++;
@@ -158,25 +176,42 @@ void change_mode() {
     mode = -1;
   }
   if(DEBUG >= DEBUG_MODE_CHANGE) {
-    Serial.print("Mode = ");
+    Serial.print("change_mode : New Mode = ");
     Serial.println(mode);
   }
 }
 
 void fade(uint32_t color) {
-
+  
 }
 
 void fade_to_white() {
-  // TODO: fade
-  strip_color = strip.Color(gammatable[intensite], gammatable[intensite], gammatable[intensite]);
+  uint8_t r, g, b;
+  int r_step, g_step, b_step;
+  r = Red(strip_color);
+  g = Green(strip_color);
+  b = Blue(strip_color);
+
+  r_step = (255-r) / FADE_STEPS;
+  g_step = (255-g) / FADE_STEPS;
+  b_step = (255-b) / FADE_STEPS;
+
+  for(int i=0; i<FADE_STEPS; i++) {
+    r += r_step;
+    g += g_step;
+    b += b_step;
+    strip_color = strip.Color(r, g, b);
+    set_strip_color(strip_color);
+    delay(DELAY);
+  }
+
 }
 
 void set_strip_color(uint32_t color) {
   for(int i=0; i<NUMPIXELS; i++) {
     strip.setPixelColor(i, color);
   }
-  strip.setBrightness(intensite);
+  strip.setBrightness(get_intensite());
   strip.show();
 }
 
@@ -208,7 +243,7 @@ uint32_t get_color_tcs() {
 
 void increase_brightness(float *r, float *g, float *b) {
   float max_value = find_max(*r, *g, *b);
-  float multiplier = get_intensite() / max_value;
+  float multiplier = 255 / max_value;
   *r *= multiplier;
   *g *= multiplier;
   *b *= multiplier;
@@ -249,3 +284,15 @@ void init_gammatable() {
     gammatable[i] = x;
   }
 } 
+
+uint8_t Red(uint32_t color) {
+  return (color >> 16) & 0xFF;
+}
+
+uint8_t Green(uint32_t color) {
+  return (color >> 8) & 0xFF;
+}
+
+uint8_t Blue(uint32_t color) {
+  return color & 0xFF;
+}
